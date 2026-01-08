@@ -7,7 +7,8 @@
 
 ## 🏗️ System Architecture
 The system is built on a modular, containerized microservices architecture to ensure high-fidelity outputs and scalability.
-[View Research PDF](./uploads/your_document.pdf)
+
+![System Design Diagram](Research_and_design.jpeg)
 
 * **Frontend:** A modern Vite + React interface featuring a conversational research environment, floating academic-themed backgrounds, and specialized artifact viewers.
 * **Orchestration (LangGraph Agent):** A state-machine-driven agent that manages user intent routing, maintains session state, and executes multi-step research plans.
