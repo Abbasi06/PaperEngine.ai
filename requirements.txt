@@ -1,0 +1,45 @@
+# Core API Framework
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+python-multipart>=0.0.6
+pydantic>=2.0.0
+
+# HTTP Client & Utilities
+requests>=2.31.0
+httpx>=0.24.1
+tqdm>=4.65.0
+python-dotenv>=1.0.0
+
+# AI & Computer Vision
+torch>=2.0.1
+torchvision>=0.15.2
+transformers>=4.31.0
+sentence-transformers>=2.2.2
+Pillow>=10.0.0
+accelerate>=0.21.0
+numpy>=1.24.0
+
+# LLM Clients & Hubs
+openai>=1.0.0
+huggingface_hub>=0.16.0
+
+# Agents & Orchestration
+langgraph>=0.0.10
+
+# Web Research & Scraping
+beautifulsoup4>=4.12.0
+arxiv>=2.0.0
+duckduckgo-search>=3.8.0
+wikipedia>=1.4.0
+
+# Document Processing & Generation
+marker-pdf>=0.0.8
+python-pptx>=0.6.21
+
+# Vector Database
+chromadb>=0.4.0
+
+# Fine-tuning & Quantization (QLoRA)
+peft>=0.4.0
+bitsandbytes>=0.41.0
+datasets>=2.14.0

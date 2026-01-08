@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  # 1. Model Loader: Runs once, downloads models, then exits.
+  model-loader:
+    build: .
+    command: python download_models.py
+    volumes:
+      - ./models:/app/models  # Share models folder with host and other containers
+
+  # 2. Brain Service
+  brain-service:
+    build: .
+    command: python backend/core/brain_service.py
+    volumes:
+      - ./models:/app/models
+    depends_on:
+      model-loader:
+        condition: service_completed_successfully
+    ports:
+      - "8001:8001" # Adjust port as needed
+    environment:
+      - PYTHONPATH=/app
+      - TOOLS_URL=http://atomic-services:8004
+      - ENGINE_URL=http://host.docker.internal:8081/v1
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # 3. Image Caption Service
+  image-caption-service:
+    build: .
+    command: python backend/core/image_caption_service.py
+    volumes:
+      - ./models:/app/models
+    depends_on:
+      brain-service:
+        condition: service_started
+    ports:
+      - "8002:8002"
+    environment:
+      - PYTHONPATH=/app
+      - VISION_ENGINE_URL=http://host.docker.internal:8082/v1
+
+  # 4. Embedding Service
+  embedding-service:
+    build: .
+    command: python backend/core/embedding_service.py
+    volumes:
+      - ./models:/app/models
+    depends_on:
+      image-caption-service:
+        condition: service_started
+    ports:
+      - "8003:8003"
+    environment:
+      - PYTHONPATH=/app
+      - EMBED_ENGINE_URL=http://host.docker.internal:8083/v1
+
+  # 5. Atomic Services
+  atomic-services:
+    build: .
+    command: python backend/core/atomic_services.py
+    depends_on:
+      embedding-service:
+        condition: service_started
+    ports:
+      - "8004:8004"
+    environment:
+      - PYTHONPATH=/app
+      - VISION_API_URL=http://image-caption-service:8002/analyze
+      - EMBEDDING_API_URL=http://embedding-service:8003/embed
+      - BRAIN_URL=http://host.docker.internal:8081/v1
+
+  # 6. API Gateway
+  api-gateway:
+    build: .
+    command: python backend/inference/api_gateway.py
+    depends_on:
+      atomic-services:
+        condition: service_started
+    ports:
+      - "8080:8080"
+    environment:
+      - PYTHONPATH=/app
+      - TOOLS_URL=http://atomic-services:8004
+      - ENGINE_URL=http://host.docker.internal:8081/v1
+
+  # 7. Frontend Server
+  frontend:
+    image: node:18-alpine
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: sh -c "npm install && npm start"
+    ports:
+      - "3000:3000"
+    depends_on:
+      api-gateway:
+        condition: service_started
